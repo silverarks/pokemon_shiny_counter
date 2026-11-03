@@ -177,3 +177,22 @@ body.mini-body { display: block; min-height: 0; overflow: hidden; }
 .mini-btns div { display: flex; gap: 6px; }
 .mini-btns div button { flex: 1; padding: 6px 10px; }
 .mini-empty { padding: 20px; color: var(--muted); text-align: center; }
+
+/* ── 알림 (되돌리기, 백업) ── */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 20px);
+  background: var(--panel-2);
+  border: 1px solid #3a3f58;
+  color: var(--text);
+  padding: 10px 18px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+button:disabled { opacity: .45; cursor: default; filter: none; }
+#undoBtn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

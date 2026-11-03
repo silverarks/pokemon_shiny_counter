@@ -12,8 +12,14 @@
   <h2>헌팅 목록</h2>
   <button class="primary" id="newHunt">+ 새 헌팅</button>
   <button id="miniToggle">📌 작은 창으로 띄우기</button>
+  <button id="undoBtn" disabled>↶ 되돌리기</button>
   <div id="huntList"></div>
   <div class="sound-box">
+    <div class="hint">기록 백업</div>
+    <button id="backupExport">💾 백업 저장</button>
+    <button id="backupImport">📂 백업 불러오기</button>
+    <input type="file" id="backupFile" accept=".json,application/json" hidden>
+    <div class="hint" style="margin-top:8px">효과음</div>
     <div class="hint" id="soundName"></div>
     <button id="soundPick">효과음 파일 선택</button>
     <button id="soundReset">기본 효과음으로</button>
@@ -23,6 +29,7 @@
 </aside>
 
 <main id="main"></main>
+<div id="toast"></div>
 
 <!-- 순서 중요: 데이터 → 기본 기능 → 화면 → 시작 -->
 <script src="data/pokemon-data.js"></script>
@@ -32,6 +39,8 @@
 <script src="js/stats.js"></script>
 <script src="js/timer.js"></script>
 <script src="js/sound.js"></script>
+<script src="js/undo.js"></script>
+<script src="js/backup.js"></script>
 <script src="js/hunts.js"></script>
 <script src="js/search.js"></script>
 <script src="js/render.js"></script>

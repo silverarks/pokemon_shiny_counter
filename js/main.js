@@ -17,11 +17,24 @@ document.getElementById("soundToggle").onclick = () => {
 };
 
 document.getElementById("miniToggle").onclick = toggleMini;
+document.getElementById("undoBtn").onclick = undo;
+document.getElementById("backupExport").onclick = exportBackup;
+document.getElementById("backupImport").onclick = () => document.getElementById("backupFile").click();
+document.getElementById("backupFile").onchange = e => {
+  const file = e.target.files[0];
+  if (file) importBackup(file);
+  e.target.value = "";
+};
 
 // 메인 화면과 작은 창에서 같이 쓰는 단축키
 function handleShortcut(e) {
-  if (["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return;
-  if (e.code === "Space" || e.key === "+" || e.key === "=") {
+  if (["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return; // 입력칸에서는 브라우저 기본 동작(입력칸 Ctrl+Z 포함)
+  if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") {
+    e.preventDefault();
+    undo();
+  } else if (e.ctrlKey || e.metaKey || e.altKey) {
+    return; // Ctrl+R 등 다른 조합키는 건드리지 않음
+  } else if (e.code === "Space" || e.key === "+" || e.key === "=") {
     e.preventDefault();
     changeCount(1);
   } else if (e.key === "-") {

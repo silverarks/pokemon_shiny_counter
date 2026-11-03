@@ -1,5 +1,6 @@
 // 헌팅 만들기 / 카운트 변경 / 확률 설정
 function createHunt() {
+  remember("새 헌팅");
   const hunt = {
     id: Date.now().toString(36),
     name: "포켓몬 미선택",
@@ -23,7 +24,9 @@ function createHunt() {
 function changeCount(delta) {
   const h = activeHunt();
   if (!h || h.found) return;
-  h.count = Math.max(0, h.count + delta * h.step);
+  if (delta < 0 && h.count === 0) return;
+  remember(delta > 0 ? `+${h.step}` : `−${h.step}`);
+  h.count =Math.max(0, h.count + delta * h.step);
   if (delta > 0) startTimer(h); // + 누르면 타이머 자동 시작
   save();
   render();

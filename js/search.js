@@ -6,6 +6,7 @@ function setupSearch(h) {
   let sel = 0;
 
   function choose(p) {
+    remember("포켓몬 선택");
     h.dex = p.dex;
     h.name = p.ko;
     save();

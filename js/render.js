@@ -3,6 +3,7 @@ function render() {
   renderList();
   renderMain();
   renderSoundToggle();
+  renderUndoButton();
   renderMini();
 }
 
@@ -89,7 +90,7 @@ function renderMain() {
       <button class="primary big" id="plus" ${h.found ? "disabled" : ""}>+${h.step}</button>
       <button id="foundBtn">${h.found ? "발견 취소" : "✨ 발견!"}</button>
     </div>
-    <div class="hint">단축키: <b>Space</b> / <b>+</b> 증가 (타이머 자동 시작) · <b>-</b> 감소 · <b>T</b> 타이머 시작/정지 (입력칸 밖에서)</div>
+    <div class="hint">단축키: <b>Space</b> / <b>+</b> 증가 (타이머 자동 시작) · <b>-</b> 감소 · <b>T</b> 타이머 시작/정지 · <b>Ctrl+Z</b> 되돌리기 (입력칸 밖에서)</div>
 
     <div class="gauge">
       <div class="gauge-title"><span>누적 발견 확률</span><b>${(chance * 100).toFixed(2)}%</b></div>
@@ -126,6 +127,7 @@ function renderMain() {
 
 function bindMainEvents(h) {
   bind("fGame", "change", e => {
+    remember("게임 변경");
     if (e.target.value === "custom") {
       h.game = "custom";
       save(); render();
@@ -136,16 +138,18 @@ function bindMainEvents(h) {
     applyMethod(h, game.id, game.methods[0][0]);
     save(); render();
   });
-  bind("fMethod", "change", e => { applyMethod(h, h.game, e.target.value); save(); render(); });
+  bind("fMethod", "change", e => { remember("방법 변경"); applyMethod(h, h.game, e.target.value); save(); render(); });
   bind("fOdds", "change", e => {
+    remember("확률 변경");
     h.odds = Math.max(1, parseFloat(e.target.value) || 1);
     h.game = "custom"; // 직접 고친 확률은 게임/방법 프리셋과 다를 수 있으니 '직접 입력'으로 전환
     save(); render();
   });
-  bind("fStep", "change", e => { h.step = Math.max(1, parseInt(e.target.value, 10) || 1); save(); render(); });
+  bind("fStep", "change", e => { remember("증가량 변경"); h.step = Math.max(1, parseInt(e.target.value, 10) || 1); save(); render(); });
   bind("plus", "click", () => changeCount(1));
   bind("minus", "click", () => changeCount(-1));
   bind("foundBtn", "click", () => {
+    remember(h.found ? "발견 취소" : "발견");
     h.found = !h.found;
     h.foundAt = h.found ? Date.now() : null;
     if (h.found) {
@@ -160,6 +164,7 @@ function bindMainEvents(h) {
   });
   bind("timerReset", "click", () => {
     if (confirm(`'${h.name}' 시간을 0:00:00으로 초기화할까요?`)) {
+      remember("시간 초기화", { restoreTime: true });
       h.elapsedMs = 0;
       h.timerStart = h.timerStart ? Date.now() : null;
       save(); render();
@@ -168,6 +173,7 @@ function bindMainEvents(h) {
   const applyTime = () => {
     const ms = parseDuration(document.getElementById("fSetTime").value);
     if (ms === null) { alert("시간을 1:30:00 또는 45:00 형식으로 입력해 주세요."); return; }
+    remember("시간 설정", { restoreTime: true });
     h.elapsedMs = ms;
     if (h.timerStart) h.timerStart = Date.now(); // 실행 중이면 입력한 시간부터 이어서
     save(); render();
@@ -177,16 +183,18 @@ function bindMainEvents(h) {
   const applyCount = () => {
     const v = parseInt(document.getElementById("fSetCount").value, 10);
     if (!Number.isFinite(v) || v < 0) { alert("0 이상의 숫자를 입력해 주세요."); return; }
+    remember("카운트 설정");
     h.count = v;
     save(); render();
   };
   bind("setCount", "click", applyCount);
   bind("fSetCount", "keydown", e => { if (e.key === "Enter") applyCount(); });
   bind("reset", "click", () => {
-    if (confirm(`'${h.name}' 카운트를 0으로 초기화할까요?`)) { h.count = 0; h.found = false; save(); render(); }
+    if (confirm(`'${h.name}' 카운트를 0으로 초기화할까요?`)) { remember("카운트 초기화"); h.count = 0; h.found = false; save(); render(); }
   });
   bind("delete", "click", () => {
     if (confirm(`'${h.name}' 헌팅을 삭제할까요?`)) {
+      remember(`'${h.name}' 삭제`);
       state.hunts = state.hunts.filter(x => x.id !== h.id);
       state.activeId = state.hunts[0]?.id ?? null;
       save(); render();
