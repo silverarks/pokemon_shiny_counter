@@ -1,0 +1,1 @@
+# pokemon_shiny_counter
