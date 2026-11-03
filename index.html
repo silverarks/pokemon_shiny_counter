@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ 포켓몬 이로치 카운터</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside>
+  <h2>헌팅 목록</h2>
+  <button class="primary" id="newHunt">+ 새 헌팅</button>
+  <button id="miniToggle">📌 작은 창으로 띄우기</button>
+  <div id="huntList"></div>
+  <div class="sound-box">
+    <div class="hint" id="soundName"></div>
+    <button id="soundPick">효과음 파일 선택</button>
+    <button id="soundReset">기본 효과음으로</button>
+    <input type="file" id="soundFile" accept="audio/*" hidden>
+    <button id="soundToggle"></button>
+  </div>
+</aside>
+
+<main id="main"></main>
+
+<!-- 순서 중요: 데이터 → 기본 기능 → 화면 → 시작 -->
+<script src="data/pokemon-data.js"></script>
+<script src="data/odds-data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/pokemon.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/hunts.js"></script>
+<script src="js/search.js"></script>
+<script src="js/render.js"></script>
+<script src="js/mini.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

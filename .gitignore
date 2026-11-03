@@ -1,0 +1,5 @@
+# JetBrains IDE 설정
+.idea/
+
+# 백업 파일 (개인 헌팅 기록)
+shiny-counter-backup-*.json
