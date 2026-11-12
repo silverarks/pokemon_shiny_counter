@@ -4,7 +4,11 @@ const BACKUP_FORMAT = "shiny-counter-backup";
 
 function exportBackup() {
   // 실행 중인 타이머는 지금까지의 시간으로 고정해서 저장 (불러올 때 그 사이 시간이 더해지지 않게)
-  const hunts = state.hunts.map(h => ({ ...h, elapsedMs: elapsedOf(h), timerStart: null }));
+  const hunts = state.hunts.map(h => {
+    const copy = structuredClone(h);
+    pauseTimer(copy); // 날짜별 시간에도 지금까지의 구간을 반영
+    return copy;
+  });
   const data = { format: BACKUP_FORMAT, version: 1, exportedAt: new Date().toISOString(), state: { ...state, hunts } };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const d = new Date();

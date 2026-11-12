@@ -90,6 +90,11 @@ function renderMain() {
       <button id="timerReset">⏹ 시간 초기화</button>
       <span class="hint" id="timerAvg">${avgText(h)}</span>
     </div>
+    <div class="today">
+      <span class="today-label">오늘</span>
+      <span><b id="todayCount">${todayCount(h).toLocaleString()}</b>회</span>
+      <span>⏱ <b id="todayTime">${formatDuration(todayMs(h))}</b></span>
+    </div>
 
     <div class="controls">
       <button id="minus">−</button>
@@ -113,6 +118,7 @@ function renderMain() {
       <div class="stat"><div class="label">기대값 대비</div><div class="value">${ratio.toFixed(2)}배</div></div>
       <div class="stat"><div class="label">현재 확률</div><div class="value">1/${formatOdds(h.odds)}</div></div>
     </div>
+    ${dailyHistoryHtml(h)}
 
     <div class="controls">
       <input id="fSetCount" type="number" min="0" value="${h.count}" style="width:120px" title="카운트 직접 입력">
@@ -129,6 +135,37 @@ function renderMain() {
 
   setupSearch(h);
   bindMainEvents(h);
+}
+
+// 날짜별 기록 표 (펼침 상태는 다시 그려도 유지)
+let dailyOpen = false;
+function dailyHistoryHtml(h) {
+  const today = dayKey();
+  const days = new Set([...Object.keys(h.dailyCount || {}), ...Object.keys(h.dailyMs || {}), today]);
+  const rows = [...days].sort().reverse()
+    .map(k => ({ k, count: h.dailyCount?.[k] || 0, ms: k === today ? todayMs(h) : h.dailyMs?.[k] || 0 }))
+    .filter(r => r.k === today || r.count || r.ms >= 1000);
+  const label = k => {
+    const [y, m, d] = k.split("-").map(Number);
+    const text = new Date(y, m - 1, d).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", weekday: "short" });
+    return k === today ? `${text} · 오늘` : text;
+  };
+  return `
+    <details class="daily" id="dailyBox" ${dailyOpen ? "open" : ""}>
+      <summary>📅 날짜별 기록 (${rows.length}일)</summary>
+      <table>
+        <thead><tr><th>날짜</th><th>시도 횟수</th><th>시간</th><th>회당 평균</th></tr></thead>
+        <tbody>
+          ${rows.map(r => `<tr class="${r.k === today ? "is-today" : ""}">
+            <td>${label(r.k)}</td>
+            <td>${r.count.toLocaleString()}</td>
+            <td>${formatDuration(r.ms)}</td>
+            <td>${r.count ? (r.ms / 1000 / r.count).toFixed(1) + "초" : "-"}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+      <div class="hint">+/− 버튼과 단축키로 센 횟수, 타이머가 돌아간 시간만 기록돼요. (카운트 직접 설정·시간 설정은 기록에 넣지 않음)</div>
+    </details>`;
 }
 
 function bindMainEvents(h) {
@@ -152,6 +189,7 @@ function bindMainEvents(h) {
     save(); render();
   });
   bind("fStep", "change", e => { remember("증가량 변경"); h.step = Math.max(1, parseInt(e.target.value, 10) || 1); save(); render(); });
+  bind("dailyBox", "toggle", e => { dailyOpen = e.target.open; });
   bind("plus", "click", () => changeCount(1));
   bind("minus", "click", () => changeCount(-1));
   bind("foundBtn", "click", () => {
@@ -180,8 +218,8 @@ function bindMainEvents(h) {
   bind("timerReset", "click", () => {
     if (confirm(`'${h.name}' 시간을 0:00:00으로 초기화할까요?`)) {
       remember("시간 초기화", { restoreTime: true });
+      restartSegment(h); // 날짜별 시간은 실제 플레이 기록이라 그대로 둠
       h.elapsedMs = 0;
-      h.timerStart = h.timerStart ? Date.now() : null;
       save(); render();
     }
   });
@@ -189,8 +227,8 @@ function bindMainEvents(h) {
     const ms = parseDuration(document.getElementById("fSetTime").value);
     if (ms === null) { alert("시간을 1:30:00 또는 45:00 형식으로 입력해 주세요."); return; }
     remember("시간 설정", { restoreTime: true });
+    restartSegment(h); // 실행 중이면 입력한 시간부터 이어서
     h.elapsedMs = ms;
-    if (h.timerStart) h.timerStart = Date.now(); // 실행 중이면 입력한 시간부터 이어서
     save(); render();
   };
   bind("setTime", "click", applyTime);

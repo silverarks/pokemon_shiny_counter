@@ -20,6 +20,11 @@ function undo() {
   const current = new Map(state.hunts.map(h => [h.id, h]));
   for (const p of prev.hunts) {
     const cur = current.get(p.id);
+    if (cur) {
+      // 날짜별 플레이 시간은 실제로 흐른 시간이라 되돌리지 않음
+      if (entry.restoreTime) restartSegment(cur);
+      p.dailyMs = cur.dailyMs;
+    }
     if (cur && !entry.restoreTime) {
       // 카운트 등을 되돌려도 그동안 흐른 시간은 그대로 둠
       p.elapsedMs = cur.elapsedMs;
