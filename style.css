@@ -158,6 +158,9 @@ input, select {
 .ticks span { position: absolute; top: 3px; transform: translateX(-50%); white-space: nowrap; }
 .hint { color: var(--muted); font-size: 13px; }
 .found-banner { color: var(--good); font-size: 22px; font-weight: bold; }
+.found-date { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--muted); font-size: 15px; }
+.found-date input { width: auto; font-size: 13px; }
+.hunt-item small { text-align: right; }
 .empty { margin: auto; text-align: center; color: var(--muted); }
 
 /* ── 작은 창 (미니 카운터) ── */

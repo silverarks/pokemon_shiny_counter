@@ -14,7 +14,8 @@ function renderList() {
     const div = document.createElement("div");
     div.className = "hunt-item" + (h.id === state.activeId ? " active" : "") + (h.found ? " done" : "");
     const icon = h.dex ? `<img src="${spriteUrl(h.dex, true)}" alt="" onerror="this.remove()">` : "";
-    div.innerHTML = `<span>${icon}${h.found ? "✨ " : ""}${escapeHtml(h.name)}</span><small>${h.count.toLocaleString()}</small>`;
+    const date = h.found && h.foundAt ? `<br>${formatFoundDate(h.foundAt, false)}` : "";
+    div.innerHTML = `<span>${icon}${h.found ? "✨ " : ""}${escapeHtml(h.name)}</span><small>${h.count.toLocaleString()}${date}</small>`;
     div.onclick = () => { state.activeId = h.id; save(); render(); };
     list.appendChild(div);
   }
@@ -75,7 +76,12 @@ function renderMain() {
         </figure>
       </div>` : `<div class="poke-title">${escapeHtml(h.name)}</div>`}
 
-    ${h.found ? `<div class="found-banner">✨ ${h.count.toLocaleString()}번 · ${formatDuration(elapsedOf(h))} 만에 발견! ✨</div>` : ""}
+    ${h.found ? `
+      <div class="found-banner">✨ ${h.count.toLocaleString()}번 · ${formatDuration(elapsedOf(h))} 만에 발견! ✨</div>
+      <div class="found-date">
+        📅 <span>${h.foundAt ? formatFoundDate(h.foundAt) : "날짜 기록 없음"}</span>
+        <input id="fFoundAt" type="datetime-local" value="${h.foundAt ? toLocalInput(h.foundAt) : ""}" title="발견 날짜 수정">
+      </div>` : ""}
     <div class="count">${h.count.toLocaleString()}</div>
 
     <div class="timer ${h.timerStart ? "running" : ""}">
@@ -158,6 +164,15 @@ function bindMainEvents(h) {
     }
     save(); render();
   });
+  if (h.found) {
+    bind("fFoundAt", "change", e => {
+      const t = new Date(e.target.value).getTime();
+      if (!Number.isFinite(t)) return;
+      remember("발견 날짜 변경");
+      h.foundAt = t;
+      save(); render();
+    });
+  }
   bind("timerToggle", "click", () => {
     h.timerStart ? pauseTimer(h) : startTimer(h);
     save(); render();
@@ -190,7 +205,7 @@ function bindMainEvents(h) {
   bind("setCount", "click", applyCount);
   bind("fSetCount", "keydown", e => { if (e.key === "Enter") applyCount(); });
   bind("reset", "click", () => {
-    if (confirm(`'${h.name}' 카운트를 0으로 초기화할까요?`)) { remember("카운트 초기화"); h.count = 0; h.found = false; save(); render(); }
+    if (confirm(`'${h.name}' 카운트를 0으로 초기화할까요?`)) { remember("카운트 초기화"); h.count = 0; h.found = false; h.foundAt = null; save(); render(); }
   });
   bind("delete", "click", () => {
     if (confirm(`'${h.name}' 헌팅을 삭제할까요?`)) {
@@ -204,6 +219,19 @@ function bindMainEvents(h) {
 
 function bind(id, evt, fn) {
   document.getElementById(id).addEventListener(evt, fn);
+}
+
+// 발견 날짜 표시: withTime이면 "2026. 11. 12. 오후 3:20", 아니면 "2026. 11. 12."
+function formatFoundDate(ms, withTime = true) {
+  const opts = { year: "numeric", month: "2-digit", day: "2-digit" };
+  if (withTime) Object.assign(opts, { hour: "numeric", minute: "2-digit" });
+  return new Date(ms).toLocaleString("ko-KR", opts);
+}
+
+// datetime-local 입력칸용 "YYYY-MM-DDTHH:MM" (내 컴퓨터 시간 기준)
+function toLocalInput(ms) {
+  const d = new Date(ms);
+  return new Date(ms - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 }
 
 function escapeHtml(s) {
