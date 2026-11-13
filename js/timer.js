@@ -89,16 +89,19 @@ function todayMs(h) {
   return (h.dailyMs?.[dayKey()] || 0) + Math.max(0, running);
 }
 
-// 실행 중인 타이머 표시만 1초마다 갱신 (전체 다시 그리기 X)
+// 실행 중인 타이머 표시만 1초마다 갱신 (전체 다시 그리기 X) — 메인 화면과 작은 창을 함께
 setInterval(() => {
   const h = activeHunt();
   if (!h || !h.timerStart) return;
+  const elapsed = formatDuration(elapsedOf(h));
+  const today = formatDuration(todayMs(h));
   const t = document.getElementById("timerText");
   const a = document.getElementById("timerAvg");
-  if (t) t.textContent = formatDuration(elapsedOf(h));
-  if (a) a.textContent = avgText(h);
   const tt = document.getElementById("todayTime");
-  if (tt) tt.textContent = formatDuration(todayMs(h));
+  if (t) t.textContent = elapsed;
+  if (a) a.textContent = avgText(h);
+  if (tt) tt.textContent = today;
+  tickMini(elapsed, today);
 }, 1000);
 
 // 창을 닫은 동안은 시간이 흐르지 않도록 일시정지해서 저장

@@ -62,6 +62,10 @@ function renderMini() {
           <span class="mini-timer ${h.timerStart ? "running" : ""}" data-action="timer" title="타이머 시작/정지 (T)">⏱ ${formatDuration(elapsedOf(h))}</span>
           · ${(chance * 100).toFixed(1)}%
         </div>
+        <div class="mini-sub mini-today">
+          <span class="today-label">오늘</span> ${todayCount(h).toLocaleString()}회
+          · <span class="mini-today-time">⏱ ${formatDuration(todayMs(h))}</span>
+        </div>
       </div>
       <div class="mini-btns">
         <button class="primary" data-action="plus" ${h.found ? "disabled" : ""}>+${h.step}</button>
@@ -83,10 +87,11 @@ function toggleMini() {
   else openMini();
 }
 
-// 작은 창의 타이머 표시만 1초마다 갱신
-setInterval(() => {
+// 작은 창의 타이머 표시만 갱신 (timer.js의 1초 타이머가 호출)
+function tickMini(elapsed, today) {
   if (!miniWin) return;
-  const h = activeHunt();
   const t = miniWin.document.querySelector(".mini-timer");
-  if (h && t && h.timerStart) t.textContent = `⏱ ${formatDuration(elapsedOf(h))}`;
-}, 1000);
+  const tt = miniWin.document.querySelector(".mini-today-time");
+  if (t) t.textContent = `⏱ ${elapsed}`;
+  if (tt) tt.textContent = `⏱ ${today}`;
+}

@@ -184,6 +184,7 @@ body.mini-body { display: block; min-height: 0; overflow: hidden; }
 .mini-count { font-size: 42px; font-weight: 800; line-height: 1.1; color: var(--accent); font-variant-numeric: tabular-nums; }
 .mini-sub { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .mini-timer { cursor: pointer; }
+.mini-today { margin-top: 2px; }
 .mini-timer.running { color: var(--good); }
 .mini-btns { display: flex; flex-direction: column; gap: 6px; }
 .mini-btns .primary { font-size: 22px; padding: 10px 16px; }
